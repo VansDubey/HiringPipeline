@@ -13,4 +13,4 @@ const alertDismissalSchema = new mongoose.Schema(
 alertDismissalSchema.index({ application: 1, stage: 1 }, { unique: true });
 alertDismissalSchema.index({ stage: 1, updatedAt: -1 });
 
-export const AlertDismissal = mongoose.model('AlertDismissal', alertDismissalSchema);
+export const AlertDismissal = mongoose.model('AlertDismissal', alertDismissalSchema)

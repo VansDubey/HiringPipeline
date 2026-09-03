@@ -7,5 +7,8 @@ export const applicationRouter = Router();
 
 applicationRouter.use(requireAuth, requireRecruiter);
 applicationRouter.post('/', controller.create);
+applicationRouter.post('/:id/advance', controller.advance);
+applicationRouter.post('/:id/reject', controller.reject);
+applicationRouter.post('/:id/reinstate', controller.reinstate);
 applicationRouter.get('/:id', controller.getById);
 applicationRouter.patch('/:id', controller.update);

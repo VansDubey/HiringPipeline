@@ -11,6 +11,20 @@ export function SessionProvider({ children }) {
       .catch(() => setSession({ status: 'anonymous', user: null }))
   }, [])
 
-  return <SessionContext.Provider value={{ ...session, setSession }}>{children}</SessionContext.Provider>
+  async function signIn(credentials) {
+    const { data } = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    })
+    setSession({ status: 'authenticated', user: data.user })
+    return data.user
+  }
+
+  async function signOut() {
+    await apiRequest('/auth/logout', { method: 'POST' })
+    setSession({ status: 'anonymous', user: null })
+  }
+
+  return <SessionContext.Provider value={{ ...session, signIn, signOut }}>{children}</SessionContext.Provider>
 }
 

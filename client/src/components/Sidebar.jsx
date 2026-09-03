@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useSession } from '../context/useSession'
 
 const sections = [
   {
@@ -20,6 +21,18 @@ const sections = [
 ]
 
 function Sidebar() {
+  const { user, signOut } = useSession()
+
+  async function handleSignOut() {
+    try {
+      await signOut()
+    } finally {
+      window.location.assign('/login')
+    }
+  }
+
+  const initials = user?.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'HF'
+
   return (
     <aside className="sidebar">
       <div className="brand-lockup">
@@ -46,12 +59,12 @@ function Sidebar() {
       </nav>
 
       <div className="account-block">
-        <div className="avatar">VD</div>
+        <div className="avatar">{initials}</div>
         <div className="account-copy">
-          <strong>Vanshika</strong>
-          <span>Recruiter</span>
+          <strong>{user?.name || 'Hiring teammate'}</strong>
+          <span>{user?.role || 'Account'}</span>
         </div>
-        <button className="icon-button" type="button" aria-label="Open account menu">...</button>
+        <button className="icon-button" type="button" aria-label="Sign out" onClick={handleSignOut}>...</button>
       </div>
     </aside>
   )

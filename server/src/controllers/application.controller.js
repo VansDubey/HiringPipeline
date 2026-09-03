@@ -9,6 +9,11 @@ import {
   rejectApplication,
   reinstateApplication,
 } from '../services/pipeline.service.js';
+import { searchApplications } from '../services/applicationSearch.service.js';
+
+export async function search(request, response) {
+  response.json({ data: await searchApplications({ user: request.user, query: request.query }) });
+}
 
 export async function listByOpening(request, response) {
   const jobOpeningId = request.params.jobOpeningId || request.params.id;

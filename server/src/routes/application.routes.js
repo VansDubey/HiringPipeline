@@ -8,6 +8,7 @@ import * as panelController from '../controllers/panel.controller.js';
 
 export const applicationRouter = Router();
 
+applicationRouter.get('/', requireAuth, controller.search);
 applicationRouter.post('/', requireAuth, requireRecruiter, controller.create);
 applicationRouter.post('/:id/advance', requireAuth, requireRecruiter, controller.advance);
 applicationRouter.post('/:id/reject', requireAuth, requireRecruiter, controller.reject);

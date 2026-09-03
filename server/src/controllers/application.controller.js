@@ -14,6 +14,7 @@ import {
   bulkAdvanceApplications,
   bulkRejectApplications,
 } from '../services/bulkApplication.service.js';
+import { exportOpenApplications } from '../services/applicationExport.service.js';
 
 export async function search(request, response) {
   response.json({ data: await searchApplications({ user: request.user, query: request.query }) });
@@ -29,6 +30,15 @@ export async function bulkReject(request, response) {
   response.json({
     data: await bulkRejectApplications(request.body?.applicationIds, request.user._id),
   });
+}
+
+export async function exportCsv(_request, response) {
+  const csv = await exportOpenApplications();
+  response
+    .status(200)
+    .type('text/csv')
+    .set('Content-Disposition', 'attachment; filename="hiring-pipeline.csv"')
+    .send(csv);
 }
 
 export async function listByOpening(request, response) {

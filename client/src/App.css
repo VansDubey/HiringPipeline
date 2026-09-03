@@ -76,6 +76,11 @@
 .icon-button:hover { color: var(--text-strong); }
 
 .main-content { min-width: 0; flex: 1; background: var(--canvas); }
+.dashboard-loading { min-height: 70vh; display: grid; place-items: center; }
+.page-error { max-width: 520px; padding: 20px; display: grid; gap: 8px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--danger); border-radius: 8px; font-size: 13px; }
+.page-error strong { color: var(--text-strong); font-size: 14px; }
+.secondary-button { width: fit-content; margin-top: 8px; padding: 8px 11px; color: var(--text-strong); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; cursor: pointer; }
+.secondary-button:hover { border-color: var(--accent); color: var(--accent); }
 .login-page { min-height: 100svh; display: grid; place-items: center; padding: 24px; background: var(--canvas); }
 .login-panel { width: min(100%, 390px); padding: 42px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
 .login-brand { display: flex; align-items: center; gap: 9px; margin-bottom: 58px; color: var(--text-strong); font-size: 16px; font-weight: 750; }

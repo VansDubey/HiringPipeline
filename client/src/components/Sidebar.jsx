@@ -1,27 +1,26 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSession } from '../context/useSession'
-
-const sections = [
-  {
-    label: 'Overview',
-    links: [{ label: 'Dashboard', to: '/' }],
-  },
-  {
-    label: 'Hiring',
-    links: [
-      { label: 'Openings', to: '/openings', meta: '7' },
-      { label: 'Candidates', to: '/candidates' },
-      { label: 'My interviews', to: '/interviews' },
-    ],
-  },
-  {
-    label: 'Attention',
-    links: [{ label: 'Stalled', to: '/stalled', meta: '6', warning: true }],
-  },
-]
+import { apiRequest } from '../services/api'
 
 function Sidebar() {
   const { user, signOut } = useSession()
+  const [stalledCount, setStalledCount] = useState(null)
+
+  useEffect(() => {
+    if (user?.role !== 'recruiter') return
+    apiRequest('/alerts')
+      .then(({ data }) => setStalledCount(data.count))
+      .catch(() => setStalledCount(null))
+  }, [user?.role])
+
+  const sections = user?.role === 'interviewer'
+    ? [{ label: 'Hiring', links: [{ label: 'My interviews', to: '/interviews' }] }]
+    : [
+        { label: 'Overview', links: [{ label: 'Dashboard', to: '/' }] },
+        { label: 'Hiring', links: [{ label: 'Openings', to: '/openings' }, { label: 'Candidates', to: '/candidates' }] },
+        { label: 'Attention', links: [{ label: 'Stalled', to: '/stalled', meta: stalledCount, warning: true }] },
+      ]
 
   async function handleSignOut() {
     try {
@@ -51,7 +50,7 @@ function Sidebar() {
                 to={link.to}
               >
                 <span>{link.label}</span>
-                {link.meta && <span className={link.warning ? 'nav-count warning' : 'nav-count'}>{link.meta}</span>}
+                {link.meta !== null && link.meta !== undefined && <span className={link.warning ? 'nav-count warning' : 'nav-count'}>{link.meta}</span>}
               </NavLink>
             ))}
           </div>

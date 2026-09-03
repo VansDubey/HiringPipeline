@@ -1,15 +1,16 @@
 :root {
-  --canvas: #f7f6f2;
+  --canvas: #f6f7f9;
   --surface: #ffffff;
-  --text-strong: #20211d;
-  --text-muted: #73746c;
-  --border: #e5e3dc;
-  --accent: #d95d39;
-  --success: #4f775d;
-  --warning: #c68b35;
-  --warning-soft: #f6ecd9;
-  --danger: #b94a48;
-  --info: #506c89;
+  --text-strong: #181a1f;
+  --text-muted: #6b7280;
+  --border: #e4e7ec;
+  --accent: #315efb;
+  --accent-hover: #244bd6;
+  --success: #23856d;
+  --warning: #d58a20;
+  --warning-soft: #fff5e3;
+  --danger: #c94b4b;
+  --info: #64748b;
   --sans: 'Geist Variable', 'Segoe UI', sans-serif;
   --mono: 'SFMono-Regular', Consolas, monospace;
   color: var(--text-muted);

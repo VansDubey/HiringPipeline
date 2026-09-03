@@ -1,3 +1,4 @@
+import dns from 'node:dns';
 import mongoose from 'mongoose';
 import { env } from './env.js';
 
@@ -5,6 +6,10 @@ export async function connectDatabase() {
   if (!env.mongoUri) {
     console.warn('MONGODB_URI is not configured; starting without a database connection.');
     return;
+  }
+
+  if (env.mongoDnsServers.length > 0) {
+    dns.setServers(env.mongoDnsServers);
   }
 
   try {

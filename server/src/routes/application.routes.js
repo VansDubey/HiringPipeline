@@ -1,14 +1,22 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
+import { requireApplicationAccess } from '../middleware/applicationAccess.js';
 import { requireRecruiter } from '../middleware/roles.js';
+import { requireInterviewer } from '../middleware/roles.js';
 import * as controller from '../controllers/application.controller.js';
+import * as panelController from '../controllers/panel.controller.js';
 
 export const applicationRouter = Router();
 
-applicationRouter.use(requireAuth, requireRecruiter);
-applicationRouter.post('/', controller.create);
-applicationRouter.post('/:id/advance', controller.advance);
-applicationRouter.post('/:id/reject', controller.reject);
-applicationRouter.post('/:id/reinstate', controller.reinstate);
-applicationRouter.get('/:id', controller.getById);
-applicationRouter.patch('/:id', controller.update);
+applicationRouter.post('/', requireAuth, requireRecruiter, controller.create);
+applicationRouter.post('/:id/advance', requireAuth, requireRecruiter, controller.advance);
+applicationRouter.post('/:id/reject', requireAuth, requireRecruiter, controller.reject);
+applicationRouter.post('/:id/reinstate', requireAuth, requireRecruiter, controller.reinstate);
+applicationRouter.get('/my-panel', requireAuth, requireInterviewer, panelController.getMyPanel);
+applicationRouter.get('/:id/panel', requireAuth, requireApplicationAccess, panelController.getPanel);
+applicationRouter.post('/:id/panel', requireAuth, requireRecruiter, panelController.assign);
+applicationRouter.delete('/:id/panel/:interviewerId', requireAuth, requireRecruiter, panelController.remove);
+applicationRouter.post('/:id/feedback', requireAuth, requireInterviewer, requireApplicationAccess, panelController.feedback);
+applicationRouter.get('/:id/timeline', requireAuth, requireApplicationAccess, panelController.timeline);
+applicationRouter.get('/:id', requireAuth, requireApplicationAccess, controller.getById);
+applicationRouter.patch('/:id', requireAuth, requireRecruiter, controller.update);

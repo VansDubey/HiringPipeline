@@ -1,5 +1,6 @@
 import { PanelAssignment } from '../models/PanelAssignment.js';
 import { USER_ROLES } from '../constants/pipeline.js';
+import { requireObjectId } from '../utils/validation.js';
 
 export async function requireApplicationAccess(request, _response, next) {
   if (!request.user) {
@@ -18,6 +19,7 @@ export async function requireApplicationAccess(request, _response, next) {
   }
 
   const applicationId = request.params.applicationId || request.params.id;
+  requireObjectId(applicationId, 'applicationId');
   const assignment = await PanelAssignment.exists({
     application: applicationId,
     interviewer: request.user._id,

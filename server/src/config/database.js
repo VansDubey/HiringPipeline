@@ -7,6 +7,14 @@ export async function connectDatabase() {
     return;
   }
 
-  await mongoose.connect(env.mongoUri);
-  console.log('Connected to MongoDB');
+  try {
+    await mongoose.connect(env.mongoUri);
+    console.log('Connected to MongoDB');
+  } catch (error) {
+    if (env.nodeEnv === 'production') {
+      throw error;
+    }
+
+    console.error(`MongoDB connection failed: ${error.message}`);
+  }
 }

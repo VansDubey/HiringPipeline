@@ -6,7 +6,9 @@ import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { authRouter } from './routes/auth.routes.js';
+import { applicationRouter } from './routes/application.routes.js';
 import { healthRouter } from './routes/health.routes.js';
+import { jobOpeningRouter } from './routes/jobOpening.routes.js';
 
 export const app = express();
 
@@ -18,6 +20,8 @@ app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
 
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/jobs', jobOpeningRouter);
+app.use('/api/applications', applicationRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

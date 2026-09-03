@@ -5,6 +5,8 @@ import PageHeader from './components/PageHeader'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
+import CandidatesPage from './pages/CandidatesPage'
+import OpeningsPage from './pages/OpeningsPage'
 import './App.css'
 
 function PlaceholderPage({ title, description }) {
@@ -12,7 +14,7 @@ function PlaceholderPage({ title, description }) {
 }
 
 function App() {
-  return <BrowserRouter><Routes><Route path="/login" element={<LoginPage />} /><Route element={<ProtectedRoute />}><Route element={<AppShell />}><Route path="/" element={<DashboardPage />} /><Route path="/openings" element={<PlaceholderPage title="Open positions" description="Keep every role, team, and candidate count in one place." />} /><Route path="/candidates" element={<PlaceholderPage title="Candidates" description="Search and move through the people in your pipeline." />} /><Route path="/interviews" element={<PlaceholderPage title="My interviews" description="Your assigned conversations, feedback, and follow-ups." />} /><Route path="/stalled" element={<PlaceholderPage title="Stalled candidates" description="Candidates remaining in the same stage for more than 10 days." />} /></Route></Route></Routes></BrowserRouter>
+  return <BrowserRouter><Routes><Route path="/login" element={<LoginPage />} /><Route element={<ProtectedRoute />}><Route element={<AppShell />}><Route path="/" element={<DashboardPage />} /><Route path="/openings" element={<OpeningsPage />} /><Route path="/openings/:id" element={<PlaceholderPage title="Opening details" description="The opening pipeline view will be added next." />} /><Route path="/candidates" element={<CandidatesPage />} /><Route path="/candidates/:id" element={<PlaceholderPage title="Candidate details" description="The candidate activity view will be added next." />} /><Route path="/interviews" element={<PlaceholderPage title="My interviews" description="Your assigned conversations, feedback, and follow-ups." />} /><Route path="/stalled" element={<PlaceholderPage title="Stalled candidates" description="Candidates remaining in the same stage for more than 10 days." />} /></Route></Route></Routes></BrowserRouter>
 }
 
 export default App

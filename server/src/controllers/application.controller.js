@@ -10,9 +10,25 @@ import {
   reinstateApplication,
 } from '../services/pipeline.service.js';
 import { searchApplications } from '../services/applicationSearch.service.js';
+import {
+  bulkAdvanceApplications,
+  bulkRejectApplications,
+} from '../services/bulkApplication.service.js';
 
 export async function search(request, response) {
   response.json({ data: await searchApplications({ user: request.user, query: request.query }) });
+}
+
+export async function bulkAdvance(request, response) {
+  response.json({
+    data: await bulkAdvanceApplications(request.body?.applicationIds, request.user._id),
+  });
+}
+
+export async function bulkReject(request, response) {
+  response.json({
+    data: await bulkRejectApplications(request.body?.applicationIds, request.user._id),
+  });
 }
 
 export async function listByOpening(request, response) {

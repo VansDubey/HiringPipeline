@@ -10,6 +10,8 @@ export const applicationRouter = Router();
 
 applicationRouter.get('/', requireAuth, controller.search);
 applicationRouter.post('/', requireAuth, requireRecruiter, controller.create);
+applicationRouter.post('/bulk-advance', requireAuth, requireRecruiter, controller.bulkAdvance);
+applicationRouter.post('/bulk-reject', requireAuth, requireRecruiter, controller.bulkReject);
 applicationRouter.post('/:id/advance', requireAuth, requireRecruiter, controller.advance);
 applicationRouter.post('/:id/reject', requireAuth, requireRecruiter, controller.reject);
 applicationRouter.post('/:id/reinstate', requireAuth, requireRecruiter, controller.reinstate);

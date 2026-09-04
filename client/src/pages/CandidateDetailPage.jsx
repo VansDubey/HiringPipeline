@@ -19,6 +19,9 @@ function CandidateDetailPage() {
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
   const [isEditing, setIsEditing] = useState(false)
+  const [interviewers, setInterviewers] = useState([])
+  const [selectedInterviewer, setSelectedInterviewer] = useState('')
+  const [panelStatus, setPanelStatus] = useState('idle')
 
   async function loadCandidate() {
     const [applicationResponse, timelineResponse, panelResponse] = await Promise.all([
@@ -52,6 +55,13 @@ function CandidateDetailPage() {
     return () => { active = false }
   }, [id])
 
+  useEffect(() => {
+    if (user?.role !== 'recruiter') return
+    apiRequest('/auth/interviewers')
+      .then((response) => setInterviewers(response.data))
+      .catch((error) => setMessage(error.message))
+  }, [user?.role])
+
   async function updateApplication(form) {
     const response = await apiRequest(`/applications/${id}`, {
       method: 'PATCH',
@@ -84,6 +94,41 @@ function CandidateDetailPage() {
     }
   }
 
+  async function assignInterviewer(event) {
+    event.preventDefault()
+    if (!selectedInterviewer) return
+    setPanelStatus('working')
+    setMessage('')
+    try {
+      await apiRequest(`/applications/${id}/panel`, {
+        method: 'POST',
+        body: JSON.stringify({ interviewerId: selectedInterviewer }),
+      })
+      setSelectedInterviewer('')
+      await loadCandidate()
+      setMessage('Interviewer assigned.')
+    } catch (error) {
+      setMessage(error.message)
+    } finally {
+      setPanelStatus('idle')
+    }
+  }
+
+  async function removeInterviewer(interviewer) {
+    if (!window.confirm(`Remove ${interviewer.name} from this interview panel?`)) return
+    setPanelStatus('working')
+    setMessage('')
+    try {
+      await apiRequest(`/applications/${id}/panel/${interviewer._id}`, { method: 'DELETE' })
+      await loadCandidate()
+      setMessage('Interviewer removed.')
+    } catch (error) {
+      setMessage(error.message)
+    } finally {
+      setPanelStatus('idle')
+    }
+  }
+
   if (status === 'loading') return <div className="page route-loading">Loading candidate...</div>
   if (status === 'error') return <div className="page page-error" role="alert"><strong>Unable to load candidate.</strong><span>{message}</span><Link className="text-link" to="/candidates">Back to candidates</Link></div>
 
@@ -93,6 +138,8 @@ function CandidateDetailPage() {
     source: application.source,
     notes: application.notes || '',
   }
+  const assignedInterviewerIds = new Set(panel.map((assignment) => assignment.interviewer._id))
+  const availableInterviewers = interviewers.filter((interviewer) => !assignedInterviewerIds.has(interviewer._id))
 
   return <div className="page candidate-detail-page">
     <Link className="back-link" to="/candidates">← Candidates</Link>
@@ -103,7 +150,11 @@ function CandidateDetailPage() {
       <main className="candidate-main">
         <section className="detail-block"><p className="section-kicker">Application</p><div className="detail-facts"><div><span>Applied via</span><strong>{application.source}</strong></div><div><span>Applied on</span><strong>{new Date(application.createdAt).toLocaleDateString()}</strong></div><div><span>Current stage</span><strong>{application.stage}</strong></div></div></section>
         <section className="detail-block"><p className="section-kicker">Notes</p><p className="notes-copy">{application.notes || 'No notes have been added.'}</p></section>
-        <section className="detail-block"><div className="section-heading"><div><p className="section-kicker">Interview panel</p><h2>{panel.length} assigned</h2></div></div>{panel.length ? <div className="panel-list">{panel.map((assignment) => <div className="panel-person" key={assignment._id}><span className="candidate-avatar">{assignment.interviewer.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><strong>{assignment.interviewer.name}</strong><small>{assignment.interviewer.email}</small></span></div>)}</div> : <p className="notes-copy">No interviewers assigned yet.</p>}</section>
+        <section className="detail-block">
+          <div className="section-heading"><div><p className="section-kicker">Interview panel</p><h2>{panel.length} assigned</h2></div></div>
+          {panel.length ? <div className="panel-list">{panel.map((assignment) => <div className="panel-person" key={assignment._id}><span className="candidate-avatar">{assignment.interviewer.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><strong>{assignment.interviewer.name}</strong><small>{assignment.interviewer.email}</small></span>{user?.role === 'recruiter' && <button className="text-button panel-remove" type="button" disabled={panelStatus === 'working'} onClick={() => removeInterviewer(assignment.interviewer)}>Remove</button>}</div>)}</div> : <p className="notes-copy">No interviewers assigned yet.</p>}
+          {user?.role === 'recruiter' && <form className="panel-assignment-form" onSubmit={assignInterviewer}><label htmlFor="panelInterviewer">Assign interviewer</label><div><select id="panelInterviewer" value={selectedInterviewer} onChange={(event) => setSelectedInterviewer(event.target.value)} required><option value="">Select an interviewer</option>{availableInterviewers.map((interviewer) => <option value={interviewer._id} key={interviewer._id}>{interviewer.name} · {interviewer.email}</option>)}</select><button className="secondary-button" type="submit" disabled={panelStatus === 'working' || !selectedInterviewer}>{panelStatus === 'working' ? 'Updating...' : 'Assign'}</button></div>{availableInterviewers.length === 0 && <small>All interviewers are already assigned.</small>}</form>}
+        </section>
         {user?.role === 'interviewer' && <form className="feedback-form detail-block" onSubmit={submitFeedback}><p className="section-kicker">Interview feedback</p><textarea rows="5" value={feedback} onChange={(event) => setFeedback(event.target.value)} placeholder="Share structured feedback..." required /><button className="primary-button" type="submit">Add feedback</button></form>}
         {user?.role === 'recruiter' && <section className="detail-actions"><button className="secondary-button" type="button" onClick={() => { setMessage(''); setIsEditing(true) }}>Edit application</button><button className="primary-button" type="button" onClick={() => transition(application.stage === 'Rejected' ? 'reinstate' : 'advance')}>{application.stage === 'Rejected' ? 'Reinstate' : 'Advance stage'}</button>{application.stage !== 'Rejected' && <button className="danger-button" type="button" onClick={() => transition('reject')}>Reject</button>}</section>}
       </main>

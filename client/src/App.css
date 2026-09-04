@@ -193,6 +193,12 @@ h2 { margin: 0; color: var(--text-strong); font-size: 17px; font-weight: 650; le
 .inline-feedback { padding-top: 16px; display: grid; gap: 9px; }.inline-feedback label { color: var(--text-strong); font-size: 11px; font-weight: 700; }.inline-feedback textarea { width: 100%; padding: 10px; color: var(--text-strong); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; resize: vertical; font-size: 12px; }.inline-feedback > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.inline-feedback .primary-button { padding: 8px 11px; }
 .success-message { margin: -18px 0 24px; padding: 10px 12px; color: var(--success); background: #edf8f4; border-left: 3px solid var(--success); font-size: 12px; }
 
+.panel-person .panel-remove { margin-left: auto; }
+.panel-assignment-form { display: grid; gap: 7px; margin-top: 18px; }
+.panel-assignment-form > label { color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.panel-assignment-form > div { display: flex; gap: 8px; }
+.panel-assignment-form select { min-width: 0; flex: 1; }
+.panel-assignment-form small { color: var(--text-muted); font-size: 10px; }
 @media (max-width: 800px) { .sidebar { width: 190px; flex-basis: 190px; }.dashboard-grid { grid-template-columns: 1fr; gap: 36px; }.page { padding-top: 36px; } }
 @media (max-width: 800px) { .candidate-detail-grid { grid-template-columns: 1fr; gap: 20px; } }
 @media (max-width: 1000px) { .stalled-row { grid-template-columns: auto minmax(160px, 1fr) 1fr auto; }.stalled-row > div:nth-child(4), .stalled-row > div:nth-child(5) { display: none; }.interview-list { grid-template-columns: 1fr; } }

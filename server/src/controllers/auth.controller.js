@@ -1,6 +1,7 @@
 import { AUTH_COOKIE_MAX_AGE_MS, AUTH_COOKIE_NAME } from '../constants/auth.js';
 import { env } from '../config/env.js';
 import { User } from '../models/User.js';
+import { USER_ROLES } from '../constants/pipeline.js';
 import {
   comparePassword,
   createAuthToken,
@@ -43,4 +44,12 @@ export function logout(_request, response) {
 
 export function getCurrentUser(request, response) {
   response.json({ data: { user: serializeUser(request.user) } });
+}
+
+export async function listInterviewers(_request, response) {
+  const interviewers = await User.find({ role: USER_ROLES.INTERVIEWER })
+    .select('name email role')
+    .sort({ name: 1 })
+    .lean();
+  response.json({ data: interviewers });
 }

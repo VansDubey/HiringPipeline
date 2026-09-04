@@ -77,7 +77,12 @@ export async function getDashboardMetrics(now = new Date()) {
       { $sort: { count: -1, title: 1 } },
     ]),
     Application.aggregate([
-      { $match: activeApplicationFilter },
+      {
+        $match: {
+          jobOpening: activeApplicationFilter.jobOpening,
+          stage: { $in: [...DASHBOARD_ACTIVE_STAGES, 'Hired'] },
+        },
+      },
       { $group: { _id: '$stage', count: { $sum: 1 } } },
       { $project: { _id: 0, stage: '$_id', count: 1 } },
       { $sort: { stage: 1 } },

@@ -6,6 +6,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { requireObjectId } from '../utils/validation.js';
 
 export const STALLED_DAYS = 10;
+export const STALLABLE_APPLICATION_STAGES = ACTIVE_APPLICATION_STAGES.filter((stage) => stage !== 'Hired');
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export function getStalledCutoff(now = new Date(), stalledDays = STALLED_DAYS) {
@@ -21,7 +22,7 @@ export async function listStalledApplications(now = new Date()) {
   const [result] = await Application.aggregate([
     {
       $match: {
-        stage: { $in: ACTIVE_APPLICATION_STAGES },
+        stage: { $in: STALLABLE_APPLICATION_STAGES },
         stageEnteredAt: { $lte: cutoff },
       },
     },
@@ -93,7 +94,7 @@ export async function dismissStalledApplication(applicationId, dismissedBy) {
   requireObjectId(applicationId, 'applicationId');
   const application = await Application.findById(applicationId).select('stage stageEnteredAt jobOpening').lean();
   if (!application) throw new ApiError(404, 'Application not found');
-  if (!ACTIVE_APPLICATION_STAGES.includes(application.stage)) {
+  if (!STALLABLE_APPLICATION_STAGES.includes(application.stage)) {
     throw new ApiError(400, 'Only active applications can have stalled alerts');
   }
   if (!isStalled(application.stageEnteredAt)) {

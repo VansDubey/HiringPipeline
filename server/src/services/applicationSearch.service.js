@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { USER_ROLES, APPLICATION_STAGES, JOB_STATUSES } from '../constants/pipeline.js';
 import { Application } from '../models/Application.js';
 import { JobOpening } from '../models/JobOpening.js';
@@ -63,7 +64,8 @@ export async function searchApplications({ user, query = {} }) {
 
   if (query.jobOpening !== undefined) {
     requireObjectId(query.jobOpening, 'jobOpening');
-    match.jobOpening = query.jobOpening;
+    // Mongoose does not cast values inside aggregation pipelines.
+    match.jobOpening = new mongoose.Types.ObjectId(query.jobOpening);
   }
 
   if (query.stage !== undefined) {
@@ -77,7 +79,7 @@ export async function searchApplications({ user, query = {} }) {
     if (typeof query.source !== 'string' || query.source.trim().length === 0 || query.source.length > 100) {
       throw new ApiError(400, 'source must be between 1 and 100 characters');
     }
-    match.source = query.source.trim();
+    match.source = new RegExp(escapeRegex(query.source.trim()), 'i');
   }
 
   if (query.search !== undefined) {

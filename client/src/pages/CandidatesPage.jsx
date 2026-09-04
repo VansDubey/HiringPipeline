@@ -26,6 +26,7 @@ function CandidatesPage() {
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState('')
   const [bulkStatus, setBulkStatus] = useState('idle')
+  const [hasLoaded, setHasLoaded] = useState(false)
 
   useEffect(() => {
     if (user?.role !== 'recruiter') return
@@ -34,16 +35,20 @@ function CandidatesPage() {
 
   useEffect(() => {
     if (user?.role !== 'recruiter') return
-    const query = new URLSearchParams({ limit: '20', page: String(pagination.page), sortBy: filters.sortBy, sortOrder: 'desc' })
-    Object.entries(filters).forEach(([key, value]) => { if (value && key !== 'sortBy') query.set(key, value) })
-    apiRequest(`/applications?${query.toString()}`)
-      .then((response) => {
-        setCandidates(response.data.data)
-        setPagination(response.data.pagination)
-        setSelected([])
-        setStatus('ready')
-      })
-      .catch((requestError) => { setError(requestError.message); setStatus('error') })
+    const timer = window.setTimeout(() => {
+      const query = new URLSearchParams({ limit: '20', page: String(pagination.page), sortBy: filters.sortBy, sortOrder: 'desc' })
+      Object.entries(filters).forEach(([key, value]) => { if (value && key !== 'sortBy') query.set(key, value) })
+      apiRequest(`/applications?${query.toString()}`)
+        .then((response) => {
+          setCandidates(response.data.data)
+          setPagination(response.data.pagination)
+          setSelected([])
+          setStatus('ready')
+          setHasLoaded(true)
+        })
+        .catch((requestError) => { setError(requestError.message); setStatus('error'); setHasLoaded(true) })
+    }, 250)
+    return () => window.clearTimeout(timer)
   }, [filters, pagination.page, user?.role])
 
   function updateFilter(event) {
@@ -101,7 +106,7 @@ function CandidatesPage() {
   }
 
   if (user?.role !== 'recruiter') return <Navigate replace to="/interviews" />
-  if (status === 'loading' && candidates.length === 0) return <div className="page route-loading">Loading candidates...</div>
+  if (!hasLoaded && status === 'loading') return <div className="page route-loading">Loading candidates...</div>
   if (status === 'error') return <div className="page"><PageHeader eyebrow="Hiring desk" title="Candidates" description="Search and move through the people in your pipeline." /><div className="page-error" role="alert"><strong>Unable to load candidates.</strong><span>{error}</span><button className="secondary-button" type="button" onClick={() => setFilters((current) => ({ ...current }))}>Try again</button></div></div>
 
   const allVisibleSelected = candidates.length > 0 && candidates.every((candidate) => selected.includes(candidate._id))

@@ -1,9 +1,10 @@
 import { Application } from '../models/Application.js';
 import { Interview } from '../models/Interview.js';
 import { JobOpening } from '../models/JobOpening.js';
-import { JOB_STATUSES } from '../constants/pipeline.js';
+import { ACTIVE_APPLICATION_STAGES, JOB_STATUSES } from '../constants/pipeline.js';
 
 const WEEKS_IN_QUARTER = 13;
+const DASHBOARD_ACTIVE_STAGES = ACTIVE_APPLICATION_STAGES.filter((stage) => stage !== 'Hired');
 
 function startOfUtcWeek(date) {
   const start = new Date(date);
@@ -40,8 +41,8 @@ function createWeekBuckets(quarterStart) {
 }
 
 async function getActiveApplicationFilter() {
-  const openOpeningIds = await JobOpening.find({ status: { $ne: JOB_STATUSES.ARCHIVED } }).distinct('_id');
-  return { jobOpening: { $in: openOpeningIds }, stage: { $ne: 'Rejected' } };
+  const openOpeningIds = await JobOpening.find({ status: JOB_STATUSES.OPEN }).distinct('_id');
+  return { jobOpening: { $in: openOpeningIds }, stage: { $in: DASHBOARD_ACTIVE_STAGES } };
 }
 
 export async function getDashboardMetrics(now = new Date()) {
@@ -125,4 +126,4 @@ export async function getDashboardMetrics(now = new Date()) {
   };
 }
 
-export { WEEKS_IN_QUARTER, createWeekBuckets, getDashboardDateRange, startOfUtcWeek };
+export { DASHBOARD_ACTIVE_STAGES, WEEKS_IN_QUARTER, createWeekBuckets, getDashboardDateRange, startOfUtcWeek };

@@ -9,4 +9,5 @@ venv/
 .env.local
 .env.*.local
 *.log
+*.cookies
 .DS_Store

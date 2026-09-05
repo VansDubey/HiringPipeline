@@ -47,6 +47,23 @@ describe('candidate workflows', () => {
     expect(apiRequest).toHaveBeenCalledWith('/applications/bulk-advance', expect.objectContaining({ method: 'POST' }))
   })
 
+  it('shows the current result range when moving between pages', async () => {
+    apiRequest.mockImplementation((path) => {
+      if (path === '/jobs') return Promise.resolve({ data: [] })
+      if (path.includes('page=2')) {
+        return Promise.resolve({ data: { data: [candidate], pagination: { page: 2, limit: 20, total: 51, totalPages: 3 } } })
+      }
+      return Promise.resolve({ data: { data: [candidate], pagination: { page: 1, limit: 20, total: 51, totalPages: 3 } } })
+    })
+
+    renderPage()
+    expect(await screen.findByText('Showing 1–1 of 51')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(await screen.findByText('Showing 21–21 of 51')).toBeInTheDocument()
+    await waitFor(() => expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining('page=2')))
+  })
+
   it('renders API failures as an error state', async () => {
     apiRequest.mockImplementation((path) => path === '/jobs' ? Promise.resolve({ data: [] }) : Promise.reject(new Error('Network unavailable')))
     renderPage()

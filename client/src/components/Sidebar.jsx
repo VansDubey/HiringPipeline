@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSession } from '../context/useSession'
 import { apiRequest } from '../services/api'
@@ -6,6 +6,8 @@ import { apiRequest } from '../services/api'
 function Sidebar() {
   const { user, signOut } = useSession()
   const [stalledCount, setStalledCount] = useState(null)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const accountMenuRef = useRef(null)
 
   useEffect(() => {
     if (user?.role !== 'recruiter') return
@@ -13,6 +15,25 @@ function Sidebar() {
       .then(({ data }) => setStalledCount(data.count))
       .catch(() => setStalledCount(null))
   }, [user?.role])
+
+  useEffect(() => {
+    if (!accountMenuOpen) return
+
+    function closeOnOutsideClick(event) {
+      if (!accountMenuRef.current?.contains(event.target)) setAccountMenuOpen(false)
+    }
+
+    function closeOnEscape(event) {
+      if (event.key === 'Escape') setAccountMenuOpen(false)
+    }
+
+    document.addEventListener('mousedown', closeOnOutsideClick)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [accountMenuOpen])
 
   const sections = user?.role === 'interviewer'
     ? [{ label: 'Hiring', links: [{ label: 'My interviews', to: '/interviews' }] }]
@@ -23,6 +44,7 @@ function Sidebar() {
       ]
 
   async function handleSignOut() {
+    setAccountMenuOpen(false)
     try {
       await signOut()
     } finally {
@@ -57,13 +79,25 @@ function Sidebar() {
         ))}
       </nav>
 
-      <div className="account-block">
+      <div className="account-block" ref={accountMenuRef}>
         <div className="avatar">{initials}</div>
         <div className="account-copy">
           <strong>{user?.name || 'Hiring teammate'}</strong>
           <span>{user?.role || 'Account'}</span>
         </div>
-        <button className="icon-button" type="button" aria-label="Sign out" onClick={handleSignOut}>...</button>
+        <button
+          className="icon-button account-menu-trigger"
+          type="button"
+          aria-label="Open account menu"
+          aria-haspopup="menu"
+          aria-expanded={accountMenuOpen}
+          onClick={() => setAccountMenuOpen((open) => !open)}
+        >...</button>
+        {accountMenuOpen && (
+          <div className="account-menu" role="menu">
+            <button type="button" role="menuitem" onClick={handleSignOut}>Log out</button>
+          </div>
+        )}
       </div>
     </aside>
   )

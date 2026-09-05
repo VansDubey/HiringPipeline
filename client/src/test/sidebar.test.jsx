@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Sidebar from '../components/Sidebar'
@@ -29,5 +29,16 @@ describe('role-specific navigation', () => {
     expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
     const stalledLink = screen.getByRole('link', { name: 'Stalled' })
     await waitFor(() => expect(stalledLink).toHaveTextContent('4'))
+  })
+
+  it('opens an account menu before signing out', () => {
+    const signOut = vi.fn()
+    apiRequest.mockResolvedValue({ data: { count: 0 } })
+    render(<SessionContext.Provider value={{ user: { name: 'Rae Recruiter', role: 'recruiter' }, signOut }}><MemoryRouter><Sidebar /></MemoryRouter></SessionContext.Provider>)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open account menu' }))
+
+    expect(screen.getByRole('menuitem', { name: 'Log out' })).toBeInTheDocument()
+    expect(signOut).not.toHaveBeenCalled()
   })
 })
